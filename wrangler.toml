@@ -4,7 +4,7 @@ compatibility_date = "2024-05-01"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "astro-agency-db"
+database_name = "astro-agency-starter"
 database_id = "f1bbf4e0-9224-4fd4-afce-3fc163dd6ead"
 
 [[r2_buckets]]
