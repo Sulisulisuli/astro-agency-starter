@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactForm from '../components/ContactForm.astro';
+---
+
+<BaseLayout>
+  <section class="py-20 text-center border-b-2 border-black bg-white">
+    <div class="container mx-auto px-4">
+        <div class="inline-block px-4 py-1 mb-6 border-2 border-black font-bold uppercase tracking-widest bg-yellow-300 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            Full Stack Agency
+        </div>
+        <h1 class="text-6xl md:text-8xl font-black tracking-tighter text-black mb-8 leading-none">
+            We Build Digital <br/>
+            <span class="text-white bg-black px-4 bg-clip-text text-transparent relative" style="-webkit-text-stroke: 2px black; text-shadow: 4px 4px 0px rgba(100,100,100,0.2);">Excellence</span>
+        </h1>
+        <p class="text-xl md:text-2xl font-bold font-mono text-gray-700 max-w-2xl mx-auto mb-10 border-l-4 border-black pl-6 text-left bg-gray-50 py-4 shadow-sm">
+            Scalable, high-performance web solutions powered by the latest technology stack.
+        </p>
+    </div>
+  </section>
+
+  <section class="py-16">
+    <div class="container mx-auto px-4">
+      <div class="max-w-xl mx-auto">
+        <ContactForm />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

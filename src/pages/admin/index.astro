@@ -1,0 +1,36 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { db, Leads, count } from 'astro:db';
+
+const leadsData = await db.select({ count: count(Leads.id) }).from(Leads);
+const totalLeads = leadsData[0]?.count || 0;
+---
+
+<AdminLayout title="Dashboard">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Leads</p>
+          <p class="text-3xl font-bold text-gray-900 mt-2">{totalLeads}</p>
+        </div>
+        <div class="p-3 bg-indigo-50 rounded-full">
+            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">System Status</p>
+            <p class="text-3xl font-bold text-green-600 mt-2">Operational</p>
+          </div>
+          <div class="p-3 bg-green-50 rounded-full">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+        </div>
+      </div>
+  </div>
+</AdminLayout>
