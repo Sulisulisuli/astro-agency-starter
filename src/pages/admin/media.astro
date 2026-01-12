@@ -2,48 +2,15 @@
 export const prerender = false;
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { actions } from 'astro:actions';
-import { S3Client, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import { listFiles } from '../../utils/media';
 
 // Helper to get environment variables. 
 // In Cloudflare Pages + platformProxy, they are in Astro.locals.runtime.env
 const appEnv = Astro.locals.runtime?.env || import.meta.env;
 
-let files = [];
-let errorMsg = "";
-let publicUrl = appEnv.PUBLIC_R2_URL || "";
+const { files, error: listError, publicUrl } = await listFiles(appEnv);
 
-if (appEnv.R2_ENDPOINT && appEnv.R2_ACCESS_KEY && appEnv.R2_SECRET_KEY) {
-    try {
-        const S3 = new S3Client({
-            region: 'auto',
-            endpoint: appEnv.R2_ENDPOINT,
-            credentials: {
-                accessKeyId: appEnv.R2_ACCESS_KEY,
-                secretAccessKey: appEnv.R2_SECRET_KEY,
-            },
-        });
-
-        const command = new ListObjectsV2Command({
-            Bucket: 'astro-agency-assets', // Assuming this matches what's used in upload
-            MaxKeys: 50
-        });
-        const response = await S3.send(command);
-        files = response.Contents || [];
-        
-        // Sort by date desc
-        files.sort((a, b) => (b.LastModified?.getTime() || 0) - (a.LastModified?.getTime() || 0));
-
-    } catch (e) {
-        console.error("R2 List Error:", e);
-        errorMsg = "Could not connect to R2 Storage. Check credentials.";
-    }
-} else {
-    // If running only with bindings, we strictly can't use S3Client comfortably without keys. 
-    // But we might be in a mode where envs are missing locally if not set.
-    if (import.meta.env.DEV) {
-         errorMsg = "R2 Keys missing in environment. Check .env";
-    }
-}
+let errorMsg = listError;
 
 const result = Astro.getActionResult(actions.media.upload);
 ---
