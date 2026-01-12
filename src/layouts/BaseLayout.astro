@@ -14,16 +14,21 @@ let configMap: Record<string, any> = {};
 
 try {
     const configs = await db.select().from(SiteConfig);
+    // Parse JSON values
     configMap = configs.reduce((acc, curr) => {
-        acc[curr.key] = curr.value;
+        try {
+            acc[curr.key] = JSON.parse(curr.value as string);
+        } catch {
+            acc[curr.key] = curr.value;
+        }
         return acc;
     }, {} as Record<string, any>);
-} catch (e) {
-    console.warn("Could not fetch SiteConfig (db might be empty or unavailable during build):", e);
-    // Fallback defaults
+} catch (e: any) {
+    console.error("DB Error:", e);
+    // Display error on page if dev or admin to see what's wrong
     configMap = {
-        site_info: { name: 'Astro Agency', description: 'Starter Kit' },
-        theme: { primary: '#3b82f6', secondary: '#1e3a8a' }
+        site_info: { name: 'DB Connection Error', description: e.message || 'Check logs' },
+        theme: { primary: '#ef4444', secondary: '#991b1b' }
     };
 }
 
