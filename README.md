@@ -1,4 +1,4 @@
-# Astro Agency Starter (v1.3)
+# Astro Agency Starter (v1.3).1
 
 A production-ready starter kit for agencies, built with Astro (Hybrid), Cloudflare Pages, Astro DB, and R2.
 
