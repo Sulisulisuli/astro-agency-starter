@@ -9,4 +9,4 @@ database_id = "f1bbf4e0-9224-4fd4-afce-3fc163dd6ead"
 
 [[r2_buckets]]
 binding = "STORAGE"
-bucket_name = "astro-agency-assets"
+bucket_name = "astro-agency-starter-bucket"
