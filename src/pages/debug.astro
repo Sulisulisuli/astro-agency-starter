@@ -1,0 +1,64 @@
+---
+export const prerender = false;
+import { db, SiteConfig } from 'astro:db';
+
+let status = "Initializing...";
+let error = null;
+let data = null;
+let envCheck = {};
+
+try {
+  // Check if DB is defined
+  if (!db) {
+    throw new Error("astro:db 'db' object is undefined");
+  }
+
+  status = "DB Object found. Attempting query...";
+  
+  // Try a simple count or select
+  data = await db.select().from(SiteConfig).limit(1);
+   status = "Success! DB connected.";
+} catch (e: any) {
+  status = "Failed";
+  error = e.message || JSON.stringify(e);
+  console.error("Debug Page Error:", e);
+}
+
+// Check runtime env if possible (Cloudflare specific)
+try {
+   // @ts-ignore
+   envCheck.DB = !!(import.meta.env.DB); 
+   // @ts-ignore
+   envCheck.SSR = import.meta.env.SSR;
+} catch (e) {
+    // ignore
+}
+---
+
+<html>
+<head><title>Debug Page</title></head>
+<body style="font-family: monospace; padding: 2rem; background: #222; color: #0f0;">
+  <h1>Diagnostics</h1>
+  <hr border-color="#444"/>
+  
+  <p><strong>Status:</strong> {status}</p>
+  
+  {error && (
+     <div style="background: #500; color: white; padding: 1rem; margin: 1rem 0;">
+       <strong>Error:</strong> {error}
+     </div>
+  )}
+
+  {data && (
+    <div>
+      <h3>Data Sample:</h3>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
+    </div>
+  )}
+
+  <h3>Environment Check:</h3>
+  <pre>{JSON.stringify(envCheck, null, 2)}</pre>
+  
+  <p>If you see this page, the Cloudflare Worker is running.</p>
+</body>
+</html>
