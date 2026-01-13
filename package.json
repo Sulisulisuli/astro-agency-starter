@@ -4,13 +4,12 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build --remote",
+    "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
-    "@astrojs/db": "^0.18.3",
     "@astrojs/sitemap": "^3.6.1",
     "@astrojs/tailwind": "^6.0.2",
     "@aws-sdk/client-s3": "^3.966.0",

@@ -1,10 +1,18 @@
 ---
 export const prerender = false;
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { db, SiteConfig } from 'astro:db';
+import { getDB } from '../../utils/db';
 import { actions } from 'astro:actions';
 
-const configs = await db.select().from(SiteConfig);
+const db = getDB(Astro);
+let configs: any[] = [];
+if (db) {
+    const result = await db.prepare('SELECT key, value FROM SiteConfig').all();
+    configs = (result.results || []).map((c: any) => ({
+        ...c,
+        value: typeof c.value === 'string' ? JSON.parse(c.value) : c.value
+    }));
+}
 const result = Astro.getActionResult(actions.config.update);
 ---
 

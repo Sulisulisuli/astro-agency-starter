@@ -1,9 +1,16 @@
 ---
 export const prerender = false;
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { db, Leads, desc } from 'astro:db';
+import { getDB } from '../../utils/db';
 
-const leads = await db.select().from(Leads).orderBy(desc(Leads.createdAt));
+const db = getDB(Astro);
+let leads: any[] = [];
+if (db) {
+    const result = await db.prepare('SELECT * FROM Leads ORDER BY createdAt DESC').all();
+    leads = result.results || [];
+    // Parse JSON payload
+    leads = leads.map(l => ({ ...l, payload: typeof l.payload === 'string' ? JSON.parse(l.payload) : l.payload }));
+}
 ---
 
 <AdminLayout title="Leads Manager">

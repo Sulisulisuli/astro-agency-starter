@@ -1,10 +1,14 @@
 ---
 export const prerender = false;
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { db, Leads, count } from 'astro:db';
+import { getDB } from '../../utils/db';
 
-const leadsData = await db.select({ count: count(Leads.id) }).from(Leads);
-const totalLeads = leadsData[0]?.count || 0;
+const db = getDB(Astro);
+let totalLeads = 0;
+if (db) {
+    const result = await db.prepare('SELECT COUNT(*) as count FROM Leads').first();
+    totalLeads = result?.count || 0;
+}
 ---
 
 <AdminLayout title="Dashboard">

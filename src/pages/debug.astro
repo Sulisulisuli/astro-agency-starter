@@ -1,34 +1,39 @@
 ---
 export const prerender = false;
-import { db, SiteConfig } from 'astro:db';
+import { getDB } from '../utils/db';
 
 let status = "Initializing...";
 let error = null;
 let data = null;
-let envCheck = {};
+let envCheck: Record<string, any> = {};
 
 try {
-  // Check if DB is defined
+  const db = getDB(Astro);
+  
   if (!db) {
-    throw new Error("astro:db 'db' object is undefined");
+    throw new Error("D1 database binding 'DB' not available in Astro.locals.runtime.env");
   }
 
-  status = "DB Object found. Attempting query...";
+  status = "D1 Binding found. Attempting query...";
   
-  // Try a simple count or select
-  data = await db.select().from(SiteConfig).limit(1);
-   status = "Success! DB connected.";
+  // Try a simple select
+  const result = await db.prepare('SELECT key, value FROM SiteConfig LIMIT 1').all();
+  data = result.results || [];
+  status = "Success! D1 connected.";
 } catch (e: any) {
   status = "Failed";
   error = e.message || JSON.stringify(e);
   console.error("Debug Page Error:", e);
 }
 
-// Check runtime env if possible (Cloudflare specific)
+// Check runtime env
 try {
    // @ts-ignore
-   envCheck.DB = !!(import.meta.env.DB); 
+   envCheck.hasRuntime = !!Astro.locals?.runtime;
    // @ts-ignore
+   envCheck.hasEnv = !!Astro.locals?.runtime?.env;
+   // @ts-ignore
+   envCheck.hasDB = !!Astro.locals?.runtime?.env?.DB;
    envCheck.SSR = import.meta.env.SSR;
 } catch (e) {
     // ignore
@@ -36,10 +41,10 @@ try {
 ---
 
 <html>
-<head><title>Debug Page</title></head>
+<head><title>Debug Page - D1 Direct</title></head>
 <body style="font-family: monospace; padding: 2rem; background: #222; color: #0f0;">
-  <h1>Diagnostics</h1>
-  <hr border-color="#444"/>
+  <h1>D1 Diagnostics</h1>
+  <hr style="border-color: #444"/>
   
   <p><strong>Status:</strong> {status}</p>
   

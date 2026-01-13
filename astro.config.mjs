@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
-import db from '@astrojs/db';
 import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 
@@ -14,9 +13,9 @@ export default defineConfig({
         },
     }),
     integrations: [
-        db({ mode: 'web' }),
         tailwind(),
         sitemap()
     ],
     site: 'https://example.com', // To be updated by user
 });
+

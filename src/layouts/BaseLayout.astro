@@ -1,6 +1,6 @@
 ---
 import Link from '../components/Link.astro'; // Will remove if unused
-import { db, SiteConfig } from 'astro:db';
+import { getDB } from '../utils/db';
 import SEO from '../components/SEO.astro';
 import '../styles/global.css';
 
@@ -9,15 +9,22 @@ interface Props {
   description?: string;
 }
 
-// Fetch global config
+// Fetch global config from D1
 let configMap: Record<string, any> = {};
 
 try {
-    const configs = await db.select().from(SiteConfig);
+    const db = getDB(Astro);
+    if (!db) {
+        throw new Error("D1 database binding 'DB' not available");
+    }
+    
+    const result = await db.prepare('SELECT key, value FROM SiteConfig').all();
+    const configs = result.results || [];
+    
     // Parse JSON values
-    configMap = configs.reduce((acc, curr) => {
+    configMap = configs.reduce((acc: Record<string, any>, curr: any) => {
         try {
-            acc[curr.key] = JSON.parse(curr.value as string);
+            acc[curr.key] = JSON.parse(curr.value);
         } catch {
             acc[curr.key] = curr.value;
         }
