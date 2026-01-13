@@ -1,14 +1,14 @@
-# Astro Agency Starter (v1.3).1
+# Astro Agency Starter (v2.0)
 
-A production-ready starter kit for agencies, built with Astro (Hybrid), Cloudflare Pages, Astro DB, and R2.
+A production-ready starter kit for agencies, built with Astro (Server Mode), Cloudflare Pages, D1, and R2.
 
 ![Astro](https://img.shields.io/badge/astro-v5.0-orange) ![Cloudflare](https://img.shields.io/badge/cloudflare-pages-orange) ![Status](https://img.shields.io/badge/status-stable-green)
 
 ## Features
 
-- **Framework**: Astro (Hybrid Mode)
-- **Database**: Astro DB (backed by D1 on Cloudflare, SQLite locally)
-- **Storage**: Cloudflare R2 (S3-compatible)
+- **Framework**: Astro (Server Mode with SSR)
+- **Database**: Cloudflare D1 (direct bindings, raw SQL)
+- **Storage**: Cloudflare R2 (S3-compatible, via AWS SDK)
 - **Styling**: Tailwind CSS with Dual-Theme System:
     - **Public**: Lofi / Neo-Brutalism (Mono font, sharp borders, noise texture).
     - **Admin**: Clean SaaS / Corporate (Inter font, clean UI).
@@ -34,74 +34,118 @@ A production-ready starter kit for agencies, built with Astro (Hybrid), Cloudfla
    ```bash
    cp .env.example .env
    ```
-   *Note: For local development without R2, the Media Upload feature will fail unless you provide R2/S3 keys.*
 
 3. **Start Development Server**
    ```bash
    npm run dev
    ```
-   Astro DB will automatically initialize a local SQLite database and seed it with `db/seed.ts`.
+   The Cloudflare adapter's `platformProxy` will simulate D1/R2 bindings locally.
 
 4. **Access Admin**
    Navigate to `http://localhost:4321/admin`.
 
 ## Deployment (Cloudflare)
 
-### 1. Cloudflare Resources
-Create your resources in the Cloudflare Dashboard:
-- **D1 Database**: Create a DB named `astro-agency-db`.
-- **R2 Bucket**: Create a bucket named `astro-agency-assets`.
+### 1. Create Cloudflare Resources
+In the Cloudflare Dashboard:
+- **D1 Database**: Create a DB named `[your-project]-db`.
+- **R2 Bucket**: Create a bucket named `[your-project]-assets`.
 
 ### 2. Configure Wrangler
 Update `wrangler.toml` with your IDs:
 ```toml
+name = "your-project-name"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-05-01"
+compatibility_flags = ["nodejs_compat"]
+
 [[d1_databases]]
 binding = "DB"
-database_name = "astro-agency-db"
-database_id = "YOUR_D1_DATABASE_ID" # <--- Update this
+database_name = "your-project-db"
+database_id = "YOUR_D1_DATABASE_ID"
 
 [[r2_buckets]]
 binding = "STORAGE"
-bucket_name = "astro-agency-assets"
+bucket_name = "your-project-assets"
 ```
 
-### 3. Deploy
-You can deploy using Wrangler or connect your Git repo to Cloudflare Pages.
-
-**Option A: Direct Upload (Wrangler)**
+### 3. Initialize Database
+Create `db/schema.sql` with your schema and seed data, then run:
 ```bash
-# Push database schema to Cloudflare D1
-npx astro db push --remote
+npx wrangler d1 execute your-project-db --remote --file db/schema.sql
+```
 
-# Build the project
+### 4. Configure Cloudflare Pages Bindings
+**CRITICAL**: You MUST configure bindings in Cloudflare Dashboard:
+
+1. **Settings** -> **Functions** -> **D1 database bindings**:
+   - Variable name: `DB`
+   - Select your D1 database
+2. **R2 bucket bindings**:
+   - Variable name: `STORAGE`
+   - Select your R2 bucket
+3. **Environment Variables**: Add `R2_ACCESS_KEY`, `R2_SECRET_KEY`, `R2_ENDPOINT`, `PUBLIC_R2_URL`.
+
+### 5. Deploy
+**Option A: Git Integration (Recommended)**
+1. Push code to GitHub.
+2. Create a Cloudflare Pages project and connect repository.
+3. Build command: `npm run build`
+4. Output directory: `dist`
+
+**Option B: Direct Upload**
+```bash
 npm run build
-
-# Deploy to Pages
 npx wrangler pages deploy dist
 ```
 
-**Option B: Git Integration (Recommended)**
-1. Push code to GitHub/GitLab.
-2. Create a Cloudflare Pages project.
-3. Connect repository.
-4. Settings > Functions > Compatibility Flags: Ensure `nodejs_compat` is enabled if needed (usually handled by adapter).
-5. **Environment Variables**: Add `R2_ACCESS_KEY`, `R2_SECRET_KEY`, `R2_ENDPOINT`, `PUBLIC_R2_URL` to Pages Settings.
-6. **Bindings**: Link D1 and R2 in Pages Settings > Functions > D1 Database Bindings / R2 Bucket Bindings.
-
 ## Structure
 
-- `src/layouts/BaseLayout.astro`: Public layout with Lofi styling.
-- `src/layouts/AdminLayout.astro`: Admin layout with clean SaaS styling.
-- `src/styles/`: Contains `global.css` (Tailwind directives).
-- `src/pages/admin/`: SSR Admin dashboard (protected by Cloudflare Access recommended).
-- `db/config.ts`: Database Schema.
-- `src/actions/`: Server Actions for Forms & Uploads.
+```
+src/
+├── utils/
+│   └── db.ts          # D1 database helper (getDB, getDBFromContext)
+├── layouts/
+│   ├── BaseLayout.astro   # Public layout with Lofi styling
+│   └── AdminLayout.astro  # Admin layout with SaaS styling
+├── pages/
+│   ├── admin/         # SSR Admin dashboard
+│   └── index.astro    # Homepage
+├── actions/           # Server Actions (config, leads, media)
+└── styles/
+    └── global.css     # Tailwind directives
+```
+
+## Database Access
+
+This project uses **direct D1 bindings** (not astro:db). Access the database using:
+
+```typescript
+// In .astro pages:
+import { getDB } from '../utils/db';
+const db = getDB(Astro);
+const result = await db.prepare('SELECT * FROM SiteConfig').all();
+
+// In actions:
+import { getDBFromContext } from '../utils/db';
+const db = getDBFromContext(context);
+```
 
 ## Architecture Notes
 
-- **Hybrid Mode**: `prerender = true` is default. Admin pages are `prerender = false`.
-- **Site Config**: Stored in DB table `SiteConfig`. Modify via Admin.
+- **Server Mode**: All dynamic pages use `output: 'server'` for SSR.
+- **Static Pages**: Use `export const prerender = true` for static generation.
+- **Site Config**: Stored in D1 table `SiteConfig`. Modify via Admin.
 - **Leads**: Contact forms save to `Leads` table.
+- **R2 Uploads**: Use lazy-loaded AWS SDK (`await import('@aws-sdk/client-s3')`).
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| 500 on all pages | Add `nodejs_compat` to Compatibility Flags in Cloudflare Dashboard |
+| "DB not available" | Configure D1 binding in Pages Settings (variable name: `DB`) |
+| R2 upload fails | Check R2 credentials in Environment Variables |
 
 ## License
 

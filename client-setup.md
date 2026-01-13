@@ -24,13 +24,18 @@ Here is the list of files you need to edit to adapt the project for a new client
 Update the configuration so the project connects to the new client's resources.
 
 ```toml
+name = "[client-project-name]"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-05-01"
+compatibility_flags = ["nodejs_compat"]  # REQUIRED!
+
 [[d1_databases]]
 binding = "DB"
 database_name = "[NEW-DB-NAME]" # e.g., flower-shop-db
 database_id = "[NEW-DATABASE-ID]"  # Paste ID from Cloudflare
 
 [[r2_buckets]]
-binding = "ASSETS"
+binding = "STORAGE"
 bucket_name = "[NEW-BUCKET-NAME]" # e.g., flower-shop-assets
 ```
 
@@ -44,12 +49,34 @@ export default defineConfig({
 });
 ```
 
-### C. `db/seed.ts` (Default Content)
-This is the most important file. It defines the 'Starter' state of the site after deployment. Edit it to match the client's branding.
+### C. Database Schema & Initial Data
+This project uses **direct D1 access** (not astro:db). To set up the database:
 
-*   `site_info`: Change `name` (Company Name) and `description`.
-*   `theme`: Change colors (`primary`, `secondary`) to the client's brand colors.
-*   `seo`: Change `twitterHandle`, leads, etc.
+1. **Create schema file** `db/schema.sql` with your tables:
+```sql
+CREATE TABLE IF NOT EXISTS SiteConfig (
+    key TEXT PRIMARY KEY,
+    value TEXT
+);
+
+CREATE TABLE IF NOT EXISTS Leads (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT,
+    payload TEXT,
+    createdAt TEXT
+);
+
+-- Insert default config
+INSERT OR REPLACE INTO SiteConfig (key, value) VALUES 
+    ('site_info', '{"name":"Client Name","description":"Client Description"}'),
+    ('theme', '{"primary":"#3b82f6","secondary":"#1e3a8a"}'),
+    ('seo', '{"twitterHandle":"@client"}');
+```
+
+2. **Push to D1**:
+```bash
+npx wrangler d1 execute [DB-NAME] --remote --file db/schema.sql
+```
 
 ### D. `.env` (Secrets)
 Copy `.env.example` to `.env` and fill in the API keys.
@@ -65,23 +92,27 @@ This project uses a "Lofi / Neo-Brutalism" aesthetic by default.
 ## 3. Deployment
 
 ### Step 1: Push Database Schema
-You must inform D1 about the table structure.
+Execute schema SQL on the remote D1 database:
 
 ```bash
-npx astro db push --remote
+npx wrangler d1 execute [DB-NAME] --remote --file db/schema.sql
 ```
 
-*You will be asked to confirm the creation of the database in production.*
+### Step 2: Configure Cloudflare Pages Bindings
+**CRITICAL**: Even if `wrangler.toml` has bindings, you MUST also configure them in the Dashboard:
 
-### Step 2: Seed Initial Data
-Populate the empty database with data defined in `db/seed.ts`.
+1. Go to **Cloudflare Dashboard** -> **Workers & Pages** -> Your Project.
+2. **Settings** -> **Functions** -> **D1 database bindings**:
+   - Variable name: `DB`
+   - Database: Select your D1 database
+3. **R2 bucket bindings**:
+   - Variable name: `STORAGE`
+   - Bucket: Select your R2 bucket
+4. **Compatibility flags** (if not auto-detected):
+   - Add `nodejs_compat` to Production and Preview
 
-```bash
-npx astro db execute db/seed.ts --remote
-```
-
-### Step 3: Publish Site
-Build and deploy the files to Cloudflare Pages.
+### Step 3: Deploy Site
+Build and deploy via Git push (auto-deploy) or manually:
 
 ```bash
 npm run build
@@ -97,3 +128,19 @@ After deployment:
 4.  Test the contact form on the homepage.
 
 **Done! The new client has a fully functional website.**
+
+---
+
+## Troubleshooting
+
+### 500 Error on All Pages
+- Check if `nodejs_compat` flag is set in Cloudflare Pages Settings.
+- Verify D1 binding is configured in Dashboard (not just wrangler.toml).
+
+### "DB not available" Error
+- Ensure binding variable name is exactly `DB` (case-sensitive).
+- Check that the database exists and was seeded with schema.
+
+### R2 Upload Fails
+- Verify R2 credentials in Environment Variables.
+- Check bucket name matches in `src/utils/media.ts`.
