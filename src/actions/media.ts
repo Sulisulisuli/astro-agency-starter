@@ -1,6 +1,5 @@
 import { defineAction, ActionError } from 'astro:actions';
 import { z } from 'astro:schema';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 export const upload = defineAction({
     accept: 'form',
@@ -20,21 +19,23 @@ export const upload = defineAction({
             });
         }
 
-        const S3 = new S3Client({
-            region: 'auto',
-            endpoint: env.R2_ENDPOINT,
-            credentials: {
-                accessKeyId: env.R2_ACCESS_KEY,
-                secretAccessKey: env.R2_SECRET_KEY,
-            },
-        });
-
-        const key = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-        const buffer = await file.arrayBuffer();
-
         try {
+            const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
+
+            const S3 = new S3Client({
+                region: 'auto',
+                endpoint: env.R2_ENDPOINT,
+                credentials: {
+                    accessKeyId: env.R2_ACCESS_KEY,
+                    secretAccessKey: env.R2_SECRET_KEY,
+                },
+            });
+
+            const key = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+            const buffer = await file.arrayBuffer();
+
             await S3.send(new PutObjectCommand({
-                Bucket: 'astro-agency-assets', // Hardcoded or from env
+                Bucket: 'astro-agency-starter-bucket', // Hardcoded or from env
                 Key: key,
                 Body: new Uint8Array(buffer),
                 ContentType: file.type,

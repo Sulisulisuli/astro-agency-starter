@@ -1,6 +1,4 @@
 
-import { S3Client, ListObjectsV2Command } from '@aws-sdk/client-s3';
-
 export async function listFiles(env: any) {
     const endpoint = env.R2_ENDPOINT || import.meta.env.R2_ENDPOINT;
     const accessKeyId = env.R2_ACCESS_KEY || import.meta.env.R2_ACCESS_KEY;
@@ -13,6 +11,8 @@ export async function listFiles(env: any) {
     }
 
     try {
+        const { S3Client, ListObjectsV2Command } = await import('@aws-sdk/client-s3');
+
         const S3 = new S3Client({
             region: 'auto',
             endpoint: endpoint,
@@ -23,7 +23,7 @@ export async function listFiles(env: any) {
         });
 
         const command = new ListObjectsV2Command({
-            Bucket: 'astro-agency-assets',
+            Bucket: 'astro-agency-starter-bucket',
             MaxKeys: 50
         });
         const response = await S3.send(command);
