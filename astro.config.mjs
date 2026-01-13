@@ -14,7 +14,7 @@ export default defineConfig({
         },
     }),
     integrations: [
-        db(),
+        db({ mode: 'web' }),
         tailwind(),
         sitemap()
     ],
