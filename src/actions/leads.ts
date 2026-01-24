@@ -26,8 +26,10 @@ export const create = defineAction({
                 .bind('contact_form', JSON.stringify(input), new Date().toISOString())
                 .run();
 
-            const ownerEmail = import.meta.env.OWNER_EMAIL;
-            const resendApiKey = import.meta.env.RESEND_API_KEY;
+            // Get vars from Cloudflare runtime or local env
+            const runtimeEnv = (context.locals as any)?.runtime?.env || {};
+            const ownerEmail = runtimeEnv.OWNER_EMAIL || import.meta.env.OWNER_EMAIL;
+            const resendApiKey = runtimeEnv.RESEND_API_KEY || import.meta.env.RESEND_API_KEY;
 
             if (!resendApiKey) {
                 console.error('RESEND_API_KEY is missing. Skipping email sending.');
