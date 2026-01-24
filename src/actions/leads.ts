@@ -10,8 +10,16 @@ export const create = defineAction({
     input: z.object({
         email: z.string().email(),
         message: z.string().min(2),
+        'bot-field': z.string().optional(),
     }),
     handler: async (input, context) => {
+        // Honeypot check
+        if (input['bot-field']) {
+            console.warn(`Spam detected (honeypot): ${input.email}`);
+            // Return fake success to confuse bots
+            return { success: true, message: 'Message received!' };
+        }
+
         const db = getDBFromContext(context);
         if (!db) {
             throw new ActionError({
@@ -23,7 +31,7 @@ export const create = defineAction({
         try {
             // 1. Save to Database
             await db.prepare('INSERT INTO Leads (type, payload, createdAt) VALUES (?, ?, ?)')
-                .bind('contact_form', JSON.stringify(input), new Date().toISOString())
+                .bind('contact_form', JSON.stringify({ email: input.email, message: input.message }), new Date().toISOString())
                 .run();
 
             // Get vars from Cloudflare runtime or local env

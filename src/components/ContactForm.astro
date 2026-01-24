@@ -36,6 +36,10 @@ import { actions } from 'astro:actions';
     >
       Send Message
     </button>
+    
+    <!-- Honeypot field for spam protection -->
+    <input type="text" name="bot-field" class="hidden" style="display:none" tabindex="-1" autocomplete="off" />
+
     <p id="form-status" class="text-sm mt-4 hidden text-center font-mono font-bold"></p>
   </form>
 </div>
