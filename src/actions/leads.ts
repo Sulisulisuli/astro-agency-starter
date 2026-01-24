@@ -3,7 +3,7 @@ import { z } from 'astro:schema';
 import { getDBFromContext } from '../utils/db';
 import { Resend } from 'resend';
 
-const resend = new Resend(import.meta.env.RESEND_API_KEY);
+
 
 export const create = defineAction({
     accept: 'form',
@@ -27,13 +27,22 @@ export const create = defineAction({
                 .run();
 
             const ownerEmail = import.meta.env.OWNER_EMAIL;
+            const resendApiKey = import.meta.env.RESEND_API_KEY;
+
+            if (!resendApiKey) {
+                console.error('RESEND_API_KEY is missing. Skipping email sending.');
+                return { success: true, message: 'Message received (Email skipped)' };
+            }
+
+            const resend = new Resend(resendApiKey);
+
             console.log('Attempting to send email to:', ownerEmail || 'fallback (delivered@resend.dev)');
-            console.log('Sending from:', 'Your Website lead <notifications.niuans.studio>');
+            console.log('Sending from:', 'Your Website lead <system@notifications.niuans.studio>');
 
             // 2. Send Email Notification
             const { data, error } = await resend.emails.send({
                 from: 'Your Website lead <system@notifications.niuans.studio>', // Change to your verified domain in production
-                to: [import.meta.env.OWNER_EMAIL || 'delivered@resend.dev'], // Ensure OWNER_EMAIL is in .env
+                to: [ownerEmail || 'delivered@resend.dev'],
                 subject: `New Lead: ${input.email}`,
                 html: `
                     <h1>New contact form message</h1>
