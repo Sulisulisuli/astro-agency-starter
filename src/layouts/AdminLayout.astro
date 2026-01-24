@@ -19,15 +19,38 @@ import '../styles/global.css';
       body { font-family: 'Inter', sans-serif; }
     </style>
   </head>
-  <body class="bg-gray-50 min-h-screen text-slate-800 flex antialiased">
-    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col fixed h-full border-r border-slate-800 z-50">
-      <div class="p-6 border-b border-slate-800">
+  <body class="bg-gray-50 min-h-screen text-slate-800 flex flex-col lg:flex-row antialiased">
+    <!-- Mobile Header -->
+    <div class="lg:hidden bg-slate-900 text-white p-4 flex justify-between items-center sticky top-0 z-40 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+            <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            <span class="font-bold text-lg">2DDK.AI</span>
+        </div>
+        <button id="mobile-menu-btn" class="text-slate-300 hover:text-white focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </div>
+
+    <!-- Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity opacity-0"></div>
+
+    <!-- Sidebar -->
+    <aside id="admin-sidebar" class="w-64 bg-slate-900 text-slate-300 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out border-r border-slate-800 h-full">
+      <div class="p-6 border-b border-slate-800 hidden lg:block">
         <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
             <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
             2DDK.AI
         </h1>
       </div>
-      <nav class="flex-1 p-4 space-y-1">
+      
+      <!-- Mobile Close Button -->
+      <div class="lg:hidden p-4 flex justify-end border-b border-slate-800">
+        <button id="close-sidebar-btn" class="text-slate-400 hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
         <a href="/admin" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800 hover:text-white transition group">
             <svg class="w-5 h-5 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
             Dashboard
@@ -38,7 +61,6 @@ import '../styles/global.css';
         </a>
         <a href="/admin/config" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800 hover:text-white transition group">
             <svg class="w-5 h-5 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
-            <svg class="w-5 h-5 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             Configuration
         </a>
         <a href="/admin/media" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800 hover:text-white transition group">
@@ -53,10 +75,11 @@ import '../styles/global.css';
         </a>
       </div>
     </aside>
-    <main class="ml-64 flex-1 p-8 overflow-y-auto w-full">
+
+    <main class="flex-1 w-full lg:ml-64 p-4 lg:p-8 overflow-y-auto">
       <div class="max-w-6xl mx-auto space-y-6">
         <header class="flex items-center justify-between pb-6 border-b border-gray-200">
-            <h2 class="text-3xl font-bold text-slate-900 tracking-tight">{title}</h2>
+            <h2 class="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">{title}</h2>
             <div class="flex items-center space-x-4">
                 <span class="text-sm text-gray-500">v1.3.0</span>
             </div>
@@ -64,5 +87,34 @@ import '../styles/global.css';
         <slot />
       </div>
     </main>
+
+    <script is:inline>
+        const sidebar = document.getElementById('admin-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+            // Small timeout to allow display:block to apply before opacity transition
+            setTimeout(() => {
+                overlay.classList.remove('opacity-0');
+            }, 10);
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('opacity-0');
+            // Wait for transition to finish before hiding
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 300);
+        }
+
+        mobileMenuBtn?.addEventListener('click', openSidebar);
+        closeSidebarBtn?.addEventListener('click', closeSidebar);
+        overlay?.addEventListener('click', closeSidebar);
+    </script>
   </body>
 </html>
