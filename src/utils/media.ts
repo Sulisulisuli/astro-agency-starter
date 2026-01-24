@@ -75,3 +75,44 @@ export async function listFiles(env: any) {
         return { files: [], error: "Could not connect to R2 Storage. " + e.message, publicUrl };
     }
 }
+
+export async function deleteFile(env: any, key: string) {
+    const endpoint = env.R2_ENDPOINT || import.meta.env.R2_ENDPOINT;
+    const accessKeyId = env.R2_ACCESS_KEY || import.meta.env.R2_ACCESS_KEY;
+    const secretAccessKey = env.R2_SECRET_KEY || import.meta.env.R2_SECRET_KEY;
+
+    if (!endpoint || !accessKeyId || !secretAccessKey) {
+        return { error: "Missing R2 credentials configuration." };
+    }
+
+    try {
+        const { AwsClient } = await import('aws4fetch');
+        const r2 = new AwsClient({
+            accessKeyId,
+            secretAccessKey,
+            service: 's3',
+            region: 'auto',
+        });
+
+        // Construct URL
+        let url = endpoint;
+        if (!url.endsWith('/')) url += '/';
+        // Need to properly encode the key
+        url += `astro-agency-starter-bucket/${encodeURIComponent(key)}`;
+
+        const response = await r2.fetch(url, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok && response.status !== 204 && response.status !== 200) {
+            const text = await response.text();
+            throw new Error(`R2 Delete Error ${response.status}: ${text}`);
+        }
+
+        return { success: true };
+
+    } catch (e: any) {
+        console.error("R2 Delete Error:", e);
+        return { error: "Could not delete file. " + e.message };
+    }
+}

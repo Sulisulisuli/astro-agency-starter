@@ -1,15 +1,15 @@
 import { defineAction, ActionError } from 'astro:actions';
 import { z } from 'astro:schema';
+import { deleteFile } from '../utils/media';
 
 export const upload = defineAction({
     accept: 'form',
     input: z.object({
-        file: z.instanceof(File), // Ensure 'File' is available in global scope (Node 20+ / CF)
+        files: z.array(z.instanceof(File)).optional(),
+        // Fallback for single file if needed, but we'll try to enforce 'files' on client
+        file: z.instanceof(File).optional(),
     }),
-    handler: async ({ file }, context) => {
-        // Determine environment variables source
-        // On Cloudflare Pages, envs are in context.locals.runtime.env
-        // locally, process.env or import.meta.env depending on setup
+    handler: async (input, context) => {
         const env = context.locals?.runtime?.env || import.meta.env;
 
         if (!env.R2_ENDPOINT || !env.R2_ACCESS_KEY || !env.R2_SECRET_KEY) {
@@ -19,9 +19,26 @@ export const upload = defineAction({
             });
         }
 
+        // Normalize input
+        let filesToUpload: File[] = [];
+        if (input.files && Array.isArray(input.files)) {
+            filesToUpload = input.files;
+        } else if (input.file) {
+            filesToUpload = [input.file];
+        }
+
+        if (filesToUpload.length === 0) {
+            throw new ActionError({
+                code: 'BAD_REQUEST',
+                message: 'No files provided',
+            });
+        }
+
+        const uploadedFiles: any[] = [];
+        const errors: any[] = [];
+
         try {
             const { AwsClient } = await import('aws4fetch');
-
             const r2 = new AwsClient({
                 accessKeyId: env.R2_ACCESS_KEY,
                 secretAccessKey: env.R2_SECRET_KEY,
@@ -29,39 +46,68 @@ export const upload = defineAction({
                 region: 'auto',
             });
 
-            const key = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-            // file is a File object, which has arrayBuffer() method
-            // aws4fetch fetch can take BodyInit which includes ArrayBuffer, but let's be safe
+            // Process uploads
+            await Promise.all(filesToUpload.map(async (file) => {
+                try {
+                    const key = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+                    let url = env.R2_ENDPOINT;
+                    if (!url.endsWith('/')) url += '/';
+                    url += `astro-agency-starter-bucket/${key}`;
 
-            // Construct URL
-            let url = env.R2_ENDPOINT;
-            if (!url.endsWith('/')) url += '/';
-            url += `astro-agency-starter-bucket/${key}`;
+                    const response = await r2.fetch(url, {
+                        method: 'PUT',
+                        body: file,
+                        headers: { 'Content-Type': file.type },
+                    });
 
-            const response = await r2.fetch(url, {
-                method: 'PUT',
-                body: file, // File object works directly in fetch
-                headers: {
-                    'Content-Type': file.type,
-                },
-            });
+                    if (!response.ok) {
+                        throw new Error(`Status ${response.status}`);
+                    }
 
-            if (!response.ok) {
-                const text = await response.text();
-                throw new Error(`R2 Upload Error ${response.status}: ${text}`);
+                    const publicUrl = env.PUBLIC_R2_URL
+                        ? `${env.PUBLIC_R2_URL}/${key}`
+                        : `https://pub-${env.R2_ACCESS_KEY}.r2.dev/${key}`;
+
+                    uploadedFiles.push({ key, url: publicUrl });
+                } catch (e: any) {
+                    errors.push({ file: file.name, error: e.message });
+                }
+            }));
+
+            if (errors.length > 0 && uploadedFiles.length === 0) {
+                throw new ActionError({
+                    code: 'INTERNAL_SERVER_ERROR',
+                    message: `Failed to upload files: ${errors.map(e => e.error).join(', ')}`,
+                });
             }
 
-            const publicUrl = env.PUBLIC_R2_URL
-                ? `${env.PUBLIC_R2_URL}/${key}`
-                : `https://pub-${env.R2_ACCESS_KEY}.r2.dev/${key}`;
+            return { success: true, uploaded: uploadedFiles, errors };
 
-            return { success: true, url: publicUrl, key };
         } catch (error: any) {
             console.error('Upload error:', error);
             throw new ActionError({
                 code: 'INTERNAL_SERVER_ERROR',
-                message: 'Failed to upload file to R2: ' + error.message,
+                message: 'System error during upload: ' + error.message,
             });
         }
+    },
+});
+
+export const remove = defineAction({
+    accept: 'form',
+    input: z.object({
+        key: z.string(),
+    }),
+    handler: async ({ key }, context) => {
+        const env = context.locals?.runtime?.env || import.meta.env;
+        const result = await deleteFile(env, key);
+
+        if (result.error) {
+            throw new ActionError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: result.error,
+            });
+        }
+        return { success: true, key };
     },
 });
