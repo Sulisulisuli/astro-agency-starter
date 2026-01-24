@@ -20,37 +20,47 @@ export const upload = defineAction({
         }
 
         try {
-            const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
+            const { AwsClient } = await import('aws4fetch');
 
-            const S3 = new S3Client({
+            const r2 = new AwsClient({
+                accessKeyId: env.R2_ACCESS_KEY,
+                secretAccessKey: env.R2_SECRET_KEY,
+                service: 's3',
                 region: 'auto',
-                endpoint: env.R2_ENDPOINT,
-                credentials: {
-                    accessKeyId: env.R2_ACCESS_KEY,
-                    secretAccessKey: env.R2_SECRET_KEY,
-                },
             });
 
             const key = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-            const buffer = await file.arrayBuffer();
+            // file is a File object, which has arrayBuffer() method
+            // aws4fetch fetch can take BodyInit which includes ArrayBuffer, but let's be safe
 
-            await S3.send(new PutObjectCommand({
-                Bucket: 'astro-agency-starter-bucket', // Hardcoded or from env
-                Key: key,
-                Body: new Uint8Array(buffer),
-                ContentType: file.type,
-            }));
+            // Construct URL
+            let url = env.R2_ENDPOINT;
+            if (!url.endsWith('/')) url += '/';
+            url += `astro-agency-starter-bucket/${key}`;
+
+            const response = await r2.fetch(url, {
+                method: 'PUT',
+                body: file, // File object works directly in fetch
+                headers: {
+                    'Content-Type': file.type,
+                },
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(`R2 Upload Error ${response.status}: ${text}`);
+            }
 
             const publicUrl = env.PUBLIC_R2_URL
                 ? `${env.PUBLIC_R2_URL}/${key}`
-                : `https://pub-${env.R2_ACCESS_KEY}.r2.dev/${key}`; // Fallback if needed, but best to force env
+                : `https://pub-${env.R2_ACCESS_KEY}.r2.dev/${key}`;
 
             return { success: true, url: publicUrl, key };
-        } catch (error) {
+        } catch (error: any) {
             console.error('Upload error:', error);
             throw new ActionError({
                 code: 'INTERNAL_SERVER_ERROR',
-                message: 'Failed to upload file to R2',
+                message: 'Failed to upload file to R2: ' + error.message,
             });
         }
     },
