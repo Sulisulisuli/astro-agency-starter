@@ -118,6 +118,26 @@ Build and deploy via Git push (auto-deploy) or manually:
 npm run build
 npx wrangler pages deploy dist
 ```
+```
+
+## 3A. Admin Security (Cloudflare Access)
+
+The `/admin` section is protected by **Cloudflare Access** (part of Zero Trust). You **MUST** configure this for the client or they will see a 403 Forbidden error.
+
+1.  Log in to **Cloudflare Dashboard** -> **Zero Trust**.
+2.  Go to **Access** -> **Applications** -> **Add an Application**.
+3.  Select **Self-hosted**.
+4.  **Application Configuration**:
+    - **Application Name**: `[Client Name] Admin Dashboard`
+    - **Session Duration**: `24 hours`
+    - **Subdomain/Path**: `[project-domain]` / `admin*` (Enable the wildcard `*`)
+5.  **Identity Providers**: Ensure "One-Time Pin" (email) is enabled.
+6.  **Policies**:
+    - Create a policy named "Allow Admins".
+    - **Action**: Allow.
+    - **Include**: **Emails** -> Add client's email addresses.
+
+> **Note**: The application code (`src/middleware.ts`) automatically checks for the `CF-Access-Authenticated-User-Email` header. If this header is missing (because Access is not configured or bypassed), the app will throw a 403 error for safety.
 
 ## 4. Admin Handoff
 
@@ -141,6 +161,11 @@ After deployment:
 - Ensure binding variable name is exactly `DB` (case-sensitive).
 - Check that the database exists and was seeded with schema.
 
+
 ### R2 Upload Fails
 - Verify R2 credentials in Environment Variables.
 - Check bucket name matches in `src/utils/media.ts`.
+
+### 403 Forbidden on /admin
+- This means Cloudflare Access Protection is working but you are not logged in or authorized.
+- Check your Zero Trust settings.
