@@ -61,6 +61,25 @@ Update the site URL (should match PUBLIC_SITE_URL):
 site: 'var'
 ```
 
+**5. Update `src/utils/media.ts` file:**
+Update the hardcoded R2 bucket name to match your new bucket:
+```typescript
+// Look for lines containing the bucket name and update them
+// e.g. url += 'astro-agency-starter-bucket?list-type=2...';
+url += 'var?list-type=2&max-keys=50'; 
+// AND
+url += `var/${encodeURIComponent(key)}`;
+```
+
+**6. Update `db/schema.sql` file:**
+Update the default seed data with the new client's information:
+```sql
+INSERT OR REPLACE INTO SiteConfig (key, value) VALUES 
+    ('site_info', '{"name":"var","description":"var"}'),
+    ('owner_email', '{"email": "var"}'),
+    -- ... other values
+```
+
 **Instructions for AI:**
 1.  Ask me for the values for each `var` listed above if I haven't provided them yet.
 2.  Once you have the values, update the respective files (`.env`, `wrangler.toml`, `package.json`, `astro.config.mjs`).
