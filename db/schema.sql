@@ -25,5 +25,6 @@ CREATE TABLE IF NOT EXISTS SystemLogs (
 -- Default seed data
 INSERT OR REPLACE INTO SiteConfig (key, value) VALUES 
     ('site_info', '{"name":"Agency Starter","description":"A production-ready starter kit for agencies."}'),
+    ('owner_email', '{"email": "delivered@resend.dev"}'),
     ('theme', '{"primary":"#3b82f6","secondary":"#1e3a8a"}'),
     ('seo', '{"twitterHandle":"@agency"}');

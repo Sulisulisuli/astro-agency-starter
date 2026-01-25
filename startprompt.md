@@ -27,7 +27,7 @@ PUBLIC_R2_URL=var
 
 # Email (Resend)
 RESEND_API_KEY=var
-OWNER_EMAIL=var
+
 
 # Site Configuration
 PUBLIC_SITE_URL=var

@@ -35,9 +35,21 @@ export const create = defineAction({
                 .run();
 
             // Get vars from Cloudflare runtime or local env
+            // Get vars from Cloudflare runtime or local env
             const runtimeEnv = (context.locals as any)?.runtime?.env || {};
-            const ownerEmail = runtimeEnv.OWNER_EMAIL || import.meta.env.OWNER_EMAIL;
             const resendApiKey = runtimeEnv.RESEND_API_KEY || import.meta.env.RESEND_API_KEY;
+
+            // Fetch owner email from DB setting
+            let ownerEmail = runtimeEnv.OWNER_EMAIL || import.meta.env.OWNER_EMAIL; // Fallback to env
+            try {
+                const configResult = await db.prepare("SELECT value FROM SiteConfig WHERE key = 'owner_email'").first();
+                if (configResult && configResult.value) {
+                    const parsed = JSON.parse(configResult.value as string);
+                    if (parsed.email) ownerEmail = parsed.email;
+                }
+            } catch (e) {
+                console.warn('Could not fetch owner_email from DB, using fallback.');
+            }
 
             if (!resendApiKey) {
                 console.error('RESEND_API_KEY is missing. Skipping email sending.');
@@ -52,7 +64,7 @@ export const create = defineAction({
             // 2. Send Email Notification
             const { data, error } = await resend.emails.send({
                 from: 'Your Website lead <system@notifications.niuans.studio>', // Change to your verified domain in production
-                to: [ownerEmail || 'delivered@resend.dev'],
+                to: ownerEmail ? ownerEmail.split(',').map((e: string) => e.trim()) : ['delivered@resend.dev'],
                 subject: `New Lead: ${input.email}`,
                 html: `
                     <h1>New contact form message</h1>
