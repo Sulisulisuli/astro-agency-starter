@@ -16,6 +16,6 @@ export default defineConfig({
         tailwind(),
         sitemap()
     ],
-    site: 'https://example.com', // To be updated by user
+    site: process.env.PUBLIC_SITE_URL || 'https://example.com', // To be updated by user
 });
 
