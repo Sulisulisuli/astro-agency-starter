@@ -16,8 +16,6 @@ Do NOT run any build commands (`npm install`, `pnpm install`, `npm run build`, e
 Please populate `.env` with the following values:
 
 ```env
-# Database (Cloudflare D1)
-ASTRO_DB_REMOTE_URL=var
 
 # Storage (Cloudflare R2)
 R2_ACCESS_KEY=var
