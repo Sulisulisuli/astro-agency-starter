@@ -47,7 +47,7 @@ export const POST: APIRoute = async ({ request, locals, cookies, params }) => {
             // Get Resend config
             // We'll use binding RESEND_API_KEY from env
             const apiKey = env.RESEND_API_KEY;
-            const fromEmail = "system@notifications.niuans.studio"; // Default Resend testing email or configured domain
+            const fromEmail = "website-code@notifications.niuans.studio"; // Default Resend testing email or configured domain
 
             if (!apiKey) {
                 console.error("[AUTH] Missing RESEND_API_KEY");
