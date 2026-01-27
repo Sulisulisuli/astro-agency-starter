@@ -1,27 +1,41 @@
-import { defineMiddleware } from 'astro:middleware';
+
+import { defineMiddleware } from 'astro/middleware';
+import { validateSession } from './lib/auth';
 
 export const onRequest = defineMiddleware(async (context, next) => {
-    // Only apply to /admin routes
-    if (context.url.pathname.startsWith('/admin')) {
+    const { url, locals, cookies } = context;
+    const runtime = locals.runtime;
 
-        // Skip check in development mode
-        if (import.meta.env.DEV) {
-            return next();
+    // 1. D1 Availability check (important for local dev without dev server running properly)
+    if (!runtime?.env?.DB) {
+        // If no DB binding (e.g. static build or misconfig), pass through but log warning 
+        // real protection happens at runtime.
+        return next();
+    }
+
+    // 2. Protected Routes Logic
+    // Protect everything under /admin, EXCEPT:
+    // - /admin/login (infinite redirect loop otherwise)
+    // - /api/auth/* (login endpoints)
+    if (url.pathname.startsWith('/admin') && !url.pathname.startsWith('/admin/login')) {
+
+        const sessionId = cookies.get('session_id')?.value;
+
+        if (!sessionId) {
+            return context.redirect('/admin/login');
         }
 
-        // In Production (Cloudflare), check for Access header
-        const email = context.request.headers.get('CF-Access-Authenticated-User-Email');
+        const { session, user } = await validateSession(runtime.env.DB, sessionId);
 
-        if (!email) {
-            // Request didn't go through Cloudflare Access or user not logged in
-            return new Response('Forbidden: Access Denied', { status: 403 });
+        if (!session || !user) {
+            // Invalid or expired session
+            cookies.delete('session_id', { path: '/' });
+            return context.redirect('/admin/login');
         }
 
-        // Optional: Check against a disallowed list if you needed stricter control here
-        // const allowedEmails = context.locals.runtime.env.ALLOWED_EMAILS?.split(',') || [];
-        // if (allowedEmails.length > 0 && !allowedEmails.includes(email)) {
-        //    return new Response('Forbidden: Unauthorized User', { status: 403 });
-        // }
+        // Attach user to locals so pages can access it
+        locals.user = user;
+        locals.session = session;
     }
 
     return next();

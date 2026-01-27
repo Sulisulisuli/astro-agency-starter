@@ -27,3 +27,26 @@ INSERT OR REPLACE INTO SiteConfig (key, value) VALUES
     ('site_info', '{"name":"Agency Starter","description":"A production-ready starter kit for agencies."}'),
     ('owner_email', '{"email": "delivered@resend.dev"}'),
     ('theme', '{"primary":"#3b82f6","secondary":"#1e3a8a"}');
+
+-- Auth Code
+CREATE TABLE IF NOT EXISTS Users (
+    id TEXT PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    role TEXT DEFAULT 'admin',
+    createdAt INTEGER DEFAULT (unixepoch())
+);
+
+CREATE TABLE IF NOT EXISTS Sessions (
+    id TEXT PRIMARY KEY,
+    userId TEXT NOT NULL,
+    expiresAt INTEGER NOT NULL,
+    FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS VerificationCodes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    code TEXT NOT NULL,
+    expiresAt INTEGER NOT NULL,
+    createdAt INTEGER DEFAULT (unixepoch())
+);
