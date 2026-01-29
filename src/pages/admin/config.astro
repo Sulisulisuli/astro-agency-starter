@@ -8,10 +8,16 @@ const db = getDB(Astro);
 let configs: any[] = [];
 if (db) {
   const result = await db.prepare("SELECT key, value FROM SiteConfig").all();
-  configs = (result.results || []).map((c: any) => ({
-    ...c,
-    value: typeof c.value === "string" ? JSON.parse(c.value) : c.value,
-  }));
+  configs = (result.results || [])
+    .map((c: any) => ({
+      ...c,
+      value: typeof c.value === "string" ? JSON.parse(c.value) : c.value,
+    }))
+    .sort((a: any, b: any) => {
+      if (a.key === "site_info") return -1;
+      if (b.key === "site_info") return 1;
+      return a.key.localeCompare(b.key);
+    });
 }
 const result = Astro.getActionResult(actions.config.update);
 ---
@@ -146,9 +152,32 @@ const result = Astro.getActionResult(actions.config.update);
                           data-config-key={conf.key}
                           data-json-key={subKey}
                           class="block w-full bg-gray-50 border-transparent focus:border-indigo-500 focus:bg-white focus:ring-0 rounded-lg px-4 py-3 text-gray-900 shadow-sm transition-colors text-sm resize-y"
+                          placeholder={
+                            subKey === "open_graph_image"
+                              ? "https://example.com/image.jpg"
+                              : ""
+                          }
                         >
                           {String(subValue).trim()}
                         </textarea>
+                      )}
+                      {subKey === "open_graph_image" && (
+                        <p class="mt-2 text-xs text-gray-500 flex items-center gap-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            class="w-4 h-4"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                          Recommended size: 1200x630px. Enter a full URL (e.g.
+                          from Media Library).
+                        </p>
                       )}
                     </div>
                   </div>

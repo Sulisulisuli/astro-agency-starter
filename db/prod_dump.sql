@@ -3,7 +3,7 @@ CREATE TABLE SiteConfig (
     key TEXT PRIMARY KEY,
     value TEXT
 );
-INSERT INTO "SiteConfig" VALUES('site_info','{"name":"Agency Starter","description":"A production-ready starter kit for agencies."}');
+INSERT INTO "SiteConfig" VALUES('site_info','{"name":"Agency Starter","description":"A production-ready starter kit for agencies.","open_graph_image":""}');
 INSERT INTO "SiteConfig" VALUES('scripts','{"head": "", "footer": ""}');
 INSERT INTO "SiteConfig" VALUES('notification_emails','{"email": "delivered@resend.dev"}');
 CREATE TABLE Leads (
