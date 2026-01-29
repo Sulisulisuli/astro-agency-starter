@@ -17,7 +17,8 @@ This is `astro-agency-starter`, a high-performance, serverless starter kit desig
 
 - **Engine**: Cloudflare D1 (SQLite-based, accessed via bindings).
 - **Schema**: Defined in `db/schema.sql` (executed via wrangler).
-    - `SiteConfig`: Key-Value storage for dynamic site settings (Title, Description, Colors).
+    - `SiteConfig`: Key-Value storage for dynamic site settings (Title, Description, Scripts).
+    - `Users` / `Sessions` / `VerificationCodes`: Custom Authentication system.
     - `Leads`: Stores contact form submissions.
     - `SystemLogs`: Optional logging table.
 - **Access Pattern**: Use `getDB(Astro)` from `src/utils/db.ts` in pages, or `getDBFromContext(context)` in actions.

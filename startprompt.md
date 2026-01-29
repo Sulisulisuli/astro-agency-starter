@@ -74,7 +74,8 @@ Update the default seed data with the new client's information:
 ```sql
 INSERT OR REPLACE INTO SiteConfig (key, value) VALUES 
     ('site_info', '{"name":"var","description":"var"}'),
-    ('owner_email', '{"email": "var"}'),
+    ('notification_emails', '{"email": "var"}'),
+    ('scripts', '{"head": "", "footer": ""}');
     -- ... other values
 ```
 

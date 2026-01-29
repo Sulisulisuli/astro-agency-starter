@@ -69,7 +69,8 @@ CREATE TABLE IF NOT EXISTS Leads (
 -- Insert default config
 INSERT OR REPLACE INTO SiteConfig (key, value) VALUES 
     ('site_info', '{"name":"Client Name","description":"Client Description"}'),
-    ('theme', '{"primary":"#3b82f6","secondary":"#1e3a8a"}'),
+    ('notification_emails', '{"email": "client@example.com"}'),
+    ('scripts', '{"head": "", "footer": ""}'),
     ('seo', '{"twitterHandle":"@client"}');
 ```
 
@@ -120,24 +121,24 @@ npx wrangler pages deploy dist
 ```
 ```
 
-## 3A. Admin Security (Cloudflare Access)
+## 3A. Admin Security (Custom Auth)
 
-The `/admin` section is protected by **Cloudflare Access** (part of Zero Trust). You **MUST** configure this for the client or they will see a 403 Forbidden error.
+The `/admin` section is protected by a built-in authentication system (Email + OTP).
 
-1.  Log in to **Cloudflare Dashboard** -> **Zero Trust**.
-2.  Go to **Access** -> **Applications** -> **Add an Application**.
-3.  Select **Self-hosted**.
-4.  **Application Configuration**:
-    - **Application Name**: `[Client Name] Admin Dashboard`
-    - **Session Duration**: `24 hours`
-    - **Subdomain/Path**: `[project-domain]` / `admin*` (Enable the wildcard `*`)
-5.  **Identity Providers**: Ensure "One-Time Pin" (email) is enabled.
-6.  **Policies**:
-    - Create a policy named "Allow Admins".
-    - **Action**: Allow.
-    - **Include**: **Emails** -> Add client's email addresses.
+1.  **First Login**:
+    *   Navigate to `/admin`.
+    *   Enter your email address (must match the seed user in `Users` table or be added manually).
+    *   You will receive a 6-digit code via email (delivered by Resend).
+    *   Enter the code to log in.
 
-> **Note**: The application code (`src/middleware.ts`) automatically checks for the `CF-Access-Authenticated-User-Email` header. If this header is missing (because Access is not configured or bypassed), the app will throw a 403 error for safety.
+2.  **Adding Admins**:
+    *   Currently, admins are managed via the database `Users` table.
+    *   To add a new admin, execute an SQL command:
+        ```bash
+        npx wrangler d1 execute [DB-NAME] --remote --command "INSERT INTO Users (id, email, role) VALUES ('unique-id', 'new-admin@example.com', 'admin')"
+        ```
+
+> **Note**: This system replaces the need for Cloudflare Zero Trust for admin access. Ensure `RESEND_API_KEY` is configured correctly for emails to work.
 
 ## 4. Admin Handoff
 
@@ -166,6 +167,7 @@ After deployment:
 - Verify R2 credentials in Environment Variables.
 - Check bucket name matches in `src/utils/media.ts`.
 
-### 403 Forbidden on /admin
-- This means Cloudflare Access Protection is working but you are not logged in or authorized.
-- Check your Zero Trust settings.
+### Login Issues / 403 Forbidden
+- Ensure your email exists in the `Users` table.
+- Check `RESEND_API_KEY` if you are not receiving OTP emails.
+- Check server logs for any DB connection errors.
