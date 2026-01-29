@@ -1,40 +1,64 @@
 ---
 export const prerender = false;
-import AdminLayout from '../../layouts/AdminLayout.astro';
-import { getDB } from '../../utils/db';
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getDB } from "../../utils/db";
+import AnalyticsStats from "../../components/admin/AnalyticsStats.astro";
 
 const db = getDB(Astro);
 let totalLeads = 0;
 if (db) {
-    const result = await db.prepare('SELECT COUNT(*) as count FROM Leads').first();
-    totalLeads = result?.count || 0;
+  const result = await db
+    .prepare("SELECT COUNT(*) as count FROM Leads")
+    .first();
+  totalLeads = result?.count || 0;
 }
 ---
 
 <AdminLayout title="Dashboard">
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Leads</p>
-          <p class="text-3xl font-bold text-gray-900 mt-2">{totalLeads}</p>
-        </div>
-        <div class="p-3 bg-indigo-50 rounded-full">
-            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-        </div>
+  <!-- Top Stats Row (Leads + other KPIs could go here if separate) -->
+  <div class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div
+      class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between"
+    >
+      <div>
+        <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">
+          Total Leads
+        </p>
+        <p class="text-3xl font-bold text-gray-900 mt-2">{totalLeads}</p>
+      </div>
+      <div class="p-3 bg-indigo-50 rounded-full">
+        <svg
+          class="w-6 h-6 text-indigo-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+          ></path></svg
+        >
       </div>
     </div>
-    
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">System Status</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">Operational</p>
-          </div>
-          <div class="p-3 bg-green-50 rounded-full">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          </div>
-        </div>
-      </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <div class="flex items-center gap-2 mb-6">
+      <svg
+        class="w-5 h-5 text-gray-500"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        ><path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
+        ></path></svg
+      >
+      <h2 class="text-lg font-bold text-gray-900">Traffic Overview</h2>
+    </div>
+    <AnalyticsStats />
   </div>
 </AdminLayout>
