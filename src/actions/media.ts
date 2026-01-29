@@ -40,7 +40,6 @@ export const upload = defineAction({
 
         try {
             const { AwsClient } = await import('aws4fetch');
-            const sharp = (await import('sharp')).default;
 
             const r2 = new AwsClient({
                 accessKeyId: env.R2_ACCESS_KEY as string,
@@ -55,26 +54,6 @@ export const upload = defineAction({
                     let buffer: ArrayBuffer | Uint8Array = await file.arrayBuffer();
                     let contentType = file.type;
                     let filename = file.name;
-
-                    // Check if it's an image and convert to WebP
-                    if (file.type.startsWith('image/')) {
-                        try {
-                            const imageBuffer = Buffer.from(buffer);
-                            const processedBuffer = await sharp(imageBuffer)
-                                .webp({ quality: 80 })
-                                .toBuffer();
-
-                            // Convert back to Uint8Array/ArrayBuffer for aws4fetch
-                            buffer = new Uint8Array(processedBuffer);
-
-                            contentType = 'image/webp';
-                            // Replace extension with .webp
-                            filename = filename.replace(/\.[^/.]+$/, "") + ".webp";
-                        } catch (err) {
-                            console.error(`Failed to convert ${file.name} to WebP:`, err);
-                            // Fallback to original file if conversion fails
-                        }
-                    }
 
                     const key = `${Date.now()}-${filename.replace(/\s+/g, '-')}`;
                     let url = env.R2_ENDPOINT as string;
