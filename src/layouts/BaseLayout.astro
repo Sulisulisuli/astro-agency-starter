@@ -1,8 +1,8 @@
 ---
-import Link from '../components/Link.astro'; // Will remove if unused
-import { getDB } from '../utils/db';
-import SEO from '../components/SEO.astro';
-import '../styles/global.css';
+import Link from "../components/Link.astro"; // Will remove if unused
+import { getDB } from "../utils/db";
+import SEO from "../components/SEO.astro";
+import "../styles/global.css";
 
 interface Props {
   title?: string;
@@ -13,68 +13,104 @@ interface Props {
 let configMap: Record<string, any> = {};
 
 try {
-    const db = getDB(Astro);
-    if (!db) {
-        throw new Error("D1 database binding 'DB' not available");
-    }
-    
-    const result = await db.prepare('SELECT key, value FROM SiteConfig').all();
-    const configs = result.results || [];
-    
-    // Parse JSON values
-    configMap = configs.reduce((acc: Record<string, any>, curr: any) => {
-        try {
-            acc[curr.key] = JSON.parse(curr.value);
-        } catch {
-            acc[curr.key] = curr.value;
-        }
-        return acc;
-    }, {} as Record<string, any>);
+  const db = getDB(Astro);
+  if (!db) {
+    throw new Error("D1 database binding 'DB' not available");
+  }
+
+  const result = await db.prepare("SELECT key, value FROM SiteConfig").all();
+  const configs = result.results || [];
+
+  // Parse JSON values
+  configMap = configs.reduce(
+    (acc: Record<string, any>, curr: any) => {
+      try {
+        acc[curr.key] = JSON.parse(curr.value);
+      } catch {
+        acc[curr.key] = curr.value;
+      }
+      return acc;
+    },
+    {} as Record<string, any>,
+  );
 } catch (e: any) {
-    console.error("DB Error:", e);
-    // Display error on page if dev or admin to see what's wrong
-    configMap = {
-        site_info: { name: 'DB Connection Error', description: e.message || 'Check logs' },
-        theme: { primary: '#ef4444', secondary: '#991b1b' }
-    };
+  console.error("DB Error:", e);
+  // Display error on page if dev or admin to see what's wrong
+  configMap = {
+    site_info: {
+      name: "DB Connection Error",
+      description: e.message || "Check logs",
+    },
+    theme: { primary: "#ef4444", secondary: "#991b1b" },
+  };
 }
 
-const { theme, site_info } = configMap;
+const { site_info, scripts } = configMap;
 
-const { title = site_info?.name, description = site_info?.description } = Astro.props;
+const { title = site_info?.name, description = site_info?.description } =
+  Astro.props;
 ---
 
 <html lang="en">
   <head>
     <SEO title={title} description={description} />
-    <style define:vars={{ 
-        'primary': theme?.primary || '#3b82f6',
-        'secondary': theme?.secondary || '#1e3a8a' 
-    }}>
+    <!-- Inject Custom Head Scripts -->
+    {scripts?.head && <Fragment set:html={scripts.head} />}
+
+    <style
+      define:vars={{
+        primary: "#ff0000" /* Hardcoded Primary */,
+        secondary: "#1e3a8a" /* Hardcoded Secondary */,
+      }}
+    >
       :root {
         --color-primary: var(--primary);
         --color-secondary: var(--secondary);
       }
     </style>
   </head>
-  <body class="min-h-screen flex flex-col font-mono text-gray-900 bg-paper bg-opacity-90 relative">
+  <body
+    class="min-h-screen flex flex-col font-mono text-gray-900 bg-paper bg-opacity-90 relative"
+  >
     <!-- Noise Texture Overlay -->
-    <div class="fixed inset-0 pointer-events-none opacity-20 z-0 mix-blend-multiply" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22 opacity=%220.5%22/%3E%3C/svg%3E');"></div>
-    
+    <div
+      class="fixed inset-0 pointer-events-none opacity-20 z-0 mix-blend-multiply"
+      style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22 opacity=%220.5%22/%3E%3C/svg%3E');"
+    >
+    </div>
+
     <header class="border-b-2 border-black bg-white p-4 z-10 relative">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="/" class="text-2xl font-bold tracking-tighter uppercase border-2 border-transparent hover:border-black px-2 py-1 transition-all">{site_info?.name}</a>
-            <nav class="space-x-6">
-                <a href="/" class="hover:underline decoration-2 underline-offset-4">Home</a>
-                <a href="/admin" class="px-4 py-2 bg-black text-white font-bold hover:bg-white hover:text-black border-2 border-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">Admin</a>
-            </nav>
-        </div>
+      <div class="container mx-auto flex justify-between items-center">
+        <a
+          href="/"
+          class="text-2xl font-bold tracking-tighter uppercase border-2 border-transparent hover:border-black px-2 py-1 transition-all"
+          >{site_info?.name}</a
+        >
+        <nav class="space-x-6">
+          <a href="/" class="hover:underline decoration-2 underline-offset-4"
+            >Home</a
+          >
+          <a
+            href="/admin"
+            class="px-4 py-2 bg-black text-white font-bold hover:bg-white hover:text-black border-2 border-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+            >Admin</a
+          >
+        </nav>
+      </div>
     </header>
     <main class="flex-grow container mx-auto p-4 z-10 relative">
       <slot />
     </main>
-    <footer class="p-8 text-center text-sm font-bold border-t-2 border-black bg-white z-10 relative mt-12">
-        <p>&copy; {new Date().getFullYear()} {site_info?.name}. <span class="text-gray-400">// EST. 2024</span></p>
+    <footer
+      class="p-8 text-center text-sm font-bold border-t-2 border-black bg-white z-10 relative mt-12"
+    >
+      <p>
+        &copy; {new Date().getFullYear()}
+        {site_info?.name}. <span class="text-gray-400">// EST. 2024</span>
+      </p>
     </footer>
+
+    <!-- Inject Custom Footer Scripts -->
+    {scripts?.footer && <Fragment set:html={scripts.footer} />}
   </body>
 </html>

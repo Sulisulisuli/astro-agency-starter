@@ -39,16 +39,18 @@ export const create = defineAction({
             const runtimeEnv = (context.locals as any)?.runtime?.env || {};
             const resendApiKey = runtimeEnv.RESEND_API_KEY || import.meta.env.RESEND_API_KEY;
 
-            // Fetch owner email from DB setting
-            let ownerEmail = runtimeEnv.OWNER_EMAIL || import.meta.env.OWNER_EMAIL; // Fallback to env
+            // Fetch notification emails from DB setting
+            let ownerEmail = 'delivered@resend.dev'; // Default fallback
             try {
-                const configResult = await db.prepare("SELECT value FROM SiteConfig WHERE key = 'owner_email'").first();
+                const configResult = await db.prepare("SELECT value FROM SiteConfig WHERE key = 'notification_emails'").first();
                 if (configResult && configResult.value) {
                     const parsed = JSON.parse(configResult.value as string);
                     if (parsed.email) ownerEmail = parsed.email;
+                } else {
+                    console.warn('No notification_emails config found in DB.');
                 }
             } catch (e) {
-                console.warn('Could not fetch owner_email from DB, using fallback.');
+                console.warn('Could not fetch notification_emails from DB, using fallback.');
             }
 
             if (!resendApiKey) {
