@@ -9,7 +9,7 @@ A production-ready starter kit for agencies, built with Astro (Server Mode), Clo
 - **Framework**: Astro (Server Mode with SSR)
 - **Database**: Cloudflare D1 (direct bindings, raw SQL)
 - **Storage**: Cloudflare R2 (S3-compatible, via AWS SDK)
-- **Styling**: Tailwind CSS (Lofi/Neo-Brutalism). Colors managed via code/Tailwind config.
+- **Styling**: Tailwind CSS. Colors managed via code/Tailwind config.
 - **Admin**: SSR Dashboard with **Custom Auth (Email via Resend)**.
 - **Custom Scripts**: Inject Head/Footer code (GTM, Analytics) via Admin.
 - **Privacy-First Analytics**: Built-in, cookie-less analytics (Pageviews, Unique Visitors, UTMs, Custom Events) stored in D1.
@@ -17,7 +17,6 @@ A production-ready starter kit for agencies, built with Astro (Server Mode), Clo
 - **SEO**: Dynamic JSON-LD, Sitemap, Robots.txt
 - **Zero JS Frontend**: Public pages use 0kb client-side JS (except progressive forms)
 - **SEO**: Dynamic JSON-LD, Sitemap, Robots.txt
-- **Zero JS Frontend**: Public pages use 0kb client-side JS (except progressive forms)
 
 ## Prerequisites
 

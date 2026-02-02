@@ -3,6 +3,10 @@ pages_build_output_dir = "dist"
 compatibility_date = "2024-05-01"
 compatibility_flags = ["nodejs_compat"]
 
+
+# Domyślne konto Cloudflare (sulimierski.jakub@gmail.com)
+account_id = "c08a11ec88e62b32f91afc2c83b4c687"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "astro-agency-starter"
