@@ -8,6 +8,7 @@ interface Props {
   title?: string;
   description?: string;
   image?: string;
+  favicon?: string;
 }
 
 // Fetch global config from D1
@@ -51,6 +52,7 @@ const {
   title = site_info?.name,
   description = site_info?.description,
   image = site_info?.open_graph_image,
+  favicon,
 } = Astro.props;
 
 const seoImage = image || undefined;
@@ -58,7 +60,12 @@ const seoImage = image || undefined;
 
 <html lang="en">
   <head>
-    <SEO title={title} description={description} image={seoImage} />
+    <SEO
+      title={title}
+      description={description}
+      image={seoImage}
+      favicon={favicon}
+    />
     <!-- Inject Custom Head Scripts -->
     {scripts?.head && <Fragment set:html={scripts.head} />}
 

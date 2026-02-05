@@ -38,6 +38,7 @@ export const create = defineAction({
             // Get vars from Cloudflare runtime or local env
             const runtimeEnv = (context.locals as any)?.runtime?.env || {};
             const resendApiKey = runtimeEnv.RESEND_API_KEY || import.meta.env.RESEND_API_KEY;
+            const emailDomain = runtimeEnv.EMAIL_DOMAIN || import.meta.env.EMAIL_DOMAIN || 'notifications.43labs.io';
 
             // Fetch notification emails from DB setting
             let ownerEmail = 'delivered@resend.dev'; // Default fallback
@@ -61,11 +62,11 @@ export const create = defineAction({
             const resend = new Resend(resendApiKey);
 
             console.log('Attempting to send email to:', ownerEmail || 'fallback (delivered@resend.dev)');
-            console.log('Sending from:', 'Your Website lead <system@notifications.niuans.studio>');
+            console.log('Sending from:', `Your Website lead <system@${emailDomain}>`);
 
             // 2. Send Email Notification
             const { data, error } = await resend.emails.send({
-                from: 'Your Website lead <system@notifications.niuans.studio>', // Change to your verified domain in production
+                from: `Your Website lead <system@${emailDomain}>`, // Change to your verified domain in production
                 to: ownerEmail ? ownerEmail.split(',').map((e: string) => e.trim()) : ['delivered@resend.dev'],
                 subject: `New Lead: ${input.email}`,
                 html: `

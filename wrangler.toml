@@ -5,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 
 # Cloudflare account (sulimierski.jakub@gmail.com)
-account_id = "c08a11ec88e62b32f91afc2c83b4c687"
+# account_id = "c08a11ec88e62b32f91afc2c83b4c687"
 
 [[d1_databases]]
 binding = "DB"

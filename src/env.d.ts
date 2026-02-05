@@ -6,6 +6,7 @@ type Runtime = import('@astrojs/cloudflare').Runtime<Env>;
 interface Env {
     DB: import('@cloudflare/workers-types').D1Database;
     RESEND_API_KEY: string;
+    EMAIL_DOMAIN: string;
 }
 
 declare namespace App {
