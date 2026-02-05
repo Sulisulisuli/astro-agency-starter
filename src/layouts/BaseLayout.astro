@@ -8,6 +8,7 @@ interface Props {
   description?: string;
   image?: string;
   favicon?: string;
+  noindex?: boolean; // Added support
 }
 
 // Fetch global config from D1
@@ -60,10 +61,11 @@ const seoImage = image || undefined;
 <html lang="en">
   <head>
     <SEO
-      title={title}
+      title={title ? `${title} | ${site_info?.name}` : site_info?.name}
       description={description}
-      image={seoImage}
+      image={image}
       favicon={favicon}
+      noindex={noindex}
     />
     <!-- Inject Custom Head Scripts -->
     {scripts?.head && <Fragment set:html={scripts.head} />}

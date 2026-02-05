@@ -6,6 +6,7 @@ interface Props {
   canonicalURL?: string | URL;
   jsonLd?: any;
   favicon?: string;
+  noindex?: boolean;
 }
 
 const {
@@ -15,6 +16,7 @@ const {
   canonicalURL = new URL(Astro.url.pathname, Astro.site),
   jsonLd,
   favicon = "/favicon.svg",
+  noindex = false,
 } = Astro.props;
 
 import { generateSchema } from "../utils/schema";
@@ -25,6 +27,7 @@ import { generateSchema } from "../utils/schema";
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="icon" type="image/svg+xml" href={favicon} />
 <meta name="generator" content={Astro.generator} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
