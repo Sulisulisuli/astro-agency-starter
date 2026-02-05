@@ -53,6 +53,7 @@ const {
   description = site_info?.description,
   image = site_info?.open_graph_image,
   favicon,
+  noindex = false,
 } = Astro.props;
 
 const seoImage = image || undefined;

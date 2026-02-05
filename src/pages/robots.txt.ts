@@ -6,6 +6,7 @@ export const GET: APIRoute = ({ site }) => {
         `User-agent: *
 Allow: /
 Disallow: /design-system
+Disallow: /admin
 
 Sitemap: ${sitemapURL.href}`,
         { headers: { 'Content-Type': 'text/plain; charset=utf-8' } }

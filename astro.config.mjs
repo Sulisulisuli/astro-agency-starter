@@ -23,7 +23,7 @@ export default defineConfig({
             },
             // Note: Astro sitemap logic might need full URL matching or relative path depends on version, usually absolute URL in filter.
             // Simplified filter:
-            filter: (page) => !page.includes('/design-system'),
+            filter: (page) => !page.includes('/design-system') && !page.includes('/admin'),
         })
     ],
     site: process.env.PUBLIC_SITE_URL || 'https://example.com', // To be updated by user
