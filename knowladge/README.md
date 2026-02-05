@@ -17,6 +17,7 @@ A production-ready starter kit for agencies, built with Astro (Server Mode), Clo
 - **SEO**: Dynamic JSON-LD, Sitemap, Robots.txt
 - **Zero JS Frontend**: Public pages use 0kb client-side JS (except progressive forms)
 - **SEO**: Dynamic JSON-LD, Sitemap, Robots.txt
+- **AI-Powered Design System**: Built-in "UI/UX Pro Max" skill for generating tailored design systems (Styles, Colors, Fonts) via local reasoning engine.
 
 ## Prerequisites
 

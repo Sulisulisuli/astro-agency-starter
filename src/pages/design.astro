@@ -1,0 +1,186 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Design System">
+    <section class="space-y-12">
+        <div class="text-center space-y-4">
+            <h1 class="text-4xl font-heading font-bold text-primary">
+                Design System
+            </h1>
+            <p class="text-text-muted max-w-2xl mx-auto">
+                This is the "Universal Agency Base" system. Change variables in
+                <code>global.css</code> to instantly re-skin the entire site.
+            </p>
+        </div>
+
+        <!-- COLORS -->
+        <div class="space-y-6">
+            <h2 class="text-2xl font-heading font-semibold border-b pb-2">
+                Colors
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Primary -->
+                <div class="space-y-2">
+                    <div
+                        class="h-24 rounded-lg bg-primary shadow-sm border border-black/5"
+                    >
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="font-bold">Primary</span>
+                        <span class="font-mono text-xs opacity-50"
+                            >--color-primary</span
+                        >
+                    </div>
+                </div>
+                <!-- Secondary -->
+                <div class="space-y-2">
+                    <div
+                        class="h-24 rounded-lg bg-secondary shadow-sm border border-black/5"
+                    >
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="font-bold">Secondary</span>
+                        <span class="font-mono text-xs opacity-50"
+                            >--color-secondary</span
+                        >
+                    </div>
+                </div>
+                <!-- Surface -->
+                <div class="space-y-2">
+                    <div
+                        class="h-24 rounded-lg bg-surface shadow-sm border border-black/5"
+                    >
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="font-bold">Surface</span>
+                        <span class="font-mono text-xs opacity-50"
+                            >--color-surface</span
+                        >
+                    </div>
+                </div>
+                <!-- Background -->
+                <div class="space-y-2">
+                    <div
+                        class="h-24 rounded-lg bg-background shadow-sm border border-black/5"
+                    >
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="font-bold">Background</span>
+                        <span class="font-mono text-xs opacity-50"
+                            >--color-background</span
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPOGRAPHY -->
+        <div class="space-y-6">
+            <h2 class="text-2xl font-heading font-semibold border-b pb-2">
+                Typography
+            </h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <span
+                        class="text-xs font-bold uppercase tracking-wider text-text-muted"
+                        >Headings (Outfit)</span
+                    >
+                    <div class="space-y-4">
+                        <h1>Heading 1 (Huge)</h1>
+                        <h2>Heading 2 (Large)</h2>
+                        <h3>Heading 3 (Medium)</h3>
+                        <h4>Heading 4 (Regular)</h4>
+                        <h5>Heading 5 (Small)</h5>
+                        <h6>Heading 6 (Tiny)</h6>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <span
+                        class="text-xs font-bold uppercase tracking-wider text-text-muted"
+                        >Body (Inter)</span
+                    >
+                    <div class="space-y-2 font-body text-text-main">
+                        <p class="leading-relaxed">
+                            Lorem ipsum dolor sit amet, consectetur adipiscing
+                            elit. Sed do eiusmod tempor incididunt ut labore et
+                            dolore magna aliqua. Ut enim ad minim veniam, quis
+                            nostrud exercitation ullamco laboris nisi ut aliquip
+                            ex ea commodo consequat.
+                        </p>
+                        <p class="text-sm text-text-muted">
+                            Small muted text for captions or secondary
+                            information.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UI COMPONENTS -->
+        <div class="space-y-6">
+            <h2 class="text-2xl font-heading font-semibold border-b pb-2">
+                UI Elements
+            </h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Cards -->
+                <div
+                    class="p-6 bg-surface rounded-xl border border-black/5 shadow-sm"
+                >
+                    <h3 class="font-heading font-bold text-lg mb-2">
+                        Surface Card
+                    </h3>
+                    <p class="text-text-muted text-sm mb-4">
+                        Cards use the <code>surface</code> color to distinguish from
+                        background.
+                    </p>
+                    <button
+                        class="text-primary font-semibold text-sm hover:underline"
+                        >Read more →</button
+                    >
+                </div>
+
+                <!-- Buttons -->
+                <div class="space-y-4">
+                    <button
+                        class="w-full px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-opacity-90 transition-all"
+                    >
+                        Primary Button
+                    </button>
+                    <button
+                        class="w-full px-6 py-3 bg-white border border-gray-200 text-text-main font-semibold rounded-lg hover:border-primary transition-all"
+                    >
+                        Secondary Button
+                    </button>
+                </div>
+
+                <!-- Inputs -->
+                <div class="space-y-3">
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-text-main mb-1"
+                            >Input Label</label
+                        >
+                        <input
+                            type="text"
+                            placeholder="Placeholder..."
+                            class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-text-main mb-1"
+                            >Select</label
+                        >
+                        <select
+                            class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-primary outline-none bg-white"
+                        >
+                            <option>Option 1</option>
+                            <option>Option 2</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</BaseLayout>

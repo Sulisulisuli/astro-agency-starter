@@ -4,12 +4,26 @@ export default {
     theme: {
         extend: {
             colors: {
-                paper: '#fcfbf9',
+                // Semantic System (Mapped to CSS Variables)
+                primary: 'var(--color-primary)',
+                secondary: 'var(--color-secondary)',
+                background: 'var(--color-background)',
+                surface: 'var(--color-surface)',
+                'text-main': 'var(--color-text-main)',
+                'text-muted': 'var(--color-text-muted)',
+
+                // Legacy / Admin Support
                 dark: '#1a1a1a',
+                paper: '#fcfbf9',
             },
             fontFamily: {
+                // Semantic Typography
+                heading: ['var(--font-heading)', 'sans-serif'],
+                body: ['var(--font-body)', 'sans-serif'],
+
+                // Legacy / Admin Support
                 mono: ['"Courier New"', 'Courier', 'monospace'],
-                sans: ['"Inter"', 'system-ui', 'sans-serif'], // Or keep system default
+                sans: ['"Inter"', 'system-ui', 'sans-serif'],
             },
             boxShadow: {
                 'lofi': '4px 4px 0px 0px rgba(0,0,0,1)',

@@ -3,10 +3,10 @@
 ## Project Overview
 This is `astro-agency-starter`, a high-performance, serverless starter kit designed for digital agencies.
 - **Stack**: Astro 5 (Server Mode), Cloudflare Pages, Cloudflare D1 (Database), Cloudflare R2 (Storage).
-- **Styling**: Tailwind CSS (Lofi/Neo-Brutalist preset).
+- **Styling**: Tailwind CSS.
     - **Global Styles**: `src/styles/global.css`.
     - **Differentiation**: 
-        - Public Site = Lofi aesthetic (`BaseLayout.astro` + `paper` theme).
+        - Public Site = Site for normal users.
         - Admin Panel = Clean SaaS aesthetic (`AdminLayout.astro` + `Inter` font).
 - **Interactivity**: Vanilla JavaScript (0KB framework overhead on public pages).
 
@@ -63,6 +63,7 @@ This is `astro-agency-starter`, a high-performance, serverless starter kit desig
 - `src/actions/index.ts`: The central export for all server actions.
 - `wrangler.toml`: Cloudflare bindings (D1, R2, compatibility flags).
 
+
 ## Workflow for LLMs (You)
 When asked to modify this project:
 1. **Use `src/utils/db.ts`** for any database access - never import from `astro:db`.
@@ -71,3 +72,19 @@ When asked to modify this project:
 4. **Respect the "Zero JS" rule** for public-facing components.
 5. **Update `wrangler.toml`** if new Cloudflare resources are needed.
 6. **Remember**: D1 bindings must be configured BOTH in `wrangler.toml` AND Cloudflare Pages Dashboard.
+
+## AI Skills & Capabilities
+### UI/UX Pro Max (Installed)
+This project is equipped with the **UI/UX Pro Max** skill (v2.0), an AI-powered design system generator.
+
+- **Location**: `.agent/skills/ui-ux-pro-max/`
+- **Engine**: Local Python reasoning engine (`scripts/search.py`) + Data (`data/*.csv`).
+- **Stack**: Configured specifically for **Astro**, **React**, and **Tailwind**.
+
+#### How to use:
+When the user asks for design work (e.g., *"Design a landing page for a law firm"*):
+1. **Activate Reasoning**: The skill automatically analyzes the request against 100+ industry rules.
+2. **Generate Design System**: It proposes a tailored system (Colors, Typography, Layout Patterns) based on the industry.
+3. **Implement**: Use the generated system to write Astro/Tailwind code.
+
+**Note**: The skill has been "slimmed down" to only support Gemini/Antigravity and the Astro stack.
