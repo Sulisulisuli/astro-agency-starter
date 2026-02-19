@@ -13,10 +13,11 @@ export const upload = defineAction({
     handler: async (input, context) => {
         const env = context.locals?.runtime?.env || import.meta.env;
 
-        if (!env.R2_ENDPOINT || !env.R2_ACCESS_KEY || !env.R2_SECRET_KEY) {
+        // Ensure STORAGE binding exists
+        if (!env.STORAGE) {
             throw new ActionError({
                 code: 'INTERNAL_SERVER_ERROR',
-                message: 'R2 configuration missing',
+                message: 'R2 STORAGE binding missing',
             });
         }
 
@@ -39,15 +40,6 @@ export const upload = defineAction({
         const errors: any[] = [];
 
         try {
-            const { AwsClient } = await import('aws4fetch');
-
-            const r2 = new AwsClient({
-                accessKeyId: env.R2_ACCESS_KEY as string,
-                secretAccessKey: env.R2_SECRET_KEY as string,
-                service: 's3',
-                region: 'auto',
-            });
-
             // Process uploads
             await Promise.all(filesToUpload.map(async (file) => {
                 try {
@@ -56,23 +48,24 @@ export const upload = defineAction({
                     let filename = file.name;
 
                     const key = `${Date.now()}-${filename.replace(/\s+/g, '-')}`;
-                    let url = env.R2_ENDPOINT as string;
-                    if (!url.endsWith('/')) url += '/';
-                    url += `astro-agency-starter-bucket/${key}`;
 
-                    const response = await r2.fetch(url, {
-                        method: 'PUT',
-                        body: buffer as any,
-                        headers: { 'Content-Type': contentType },
+                    // Native R2 Upload
+                    await env.STORAGE.put(key, buffer, {
+                        httpMetadata: { contentType: contentType }
                     });
 
-                    if (!response.ok) {
-                        throw new Error(`Status ${response.status}`);
-                    }
+                    // Public URL generation
+                    // If env.PUBLIC_R2_URL is set, use it. Otherwise, warn or fallback.
+                    const publicUrlBase = env.PUBLIC_R2_URL;
 
-                    const publicUrl = env.PUBLIC_R2_URL
-                        ? `${env.PUBLIC_R2_URL}/${key}`
-                        : `https://pub-${env.R2_ACCESS_KEY}.r2.dev/${key}`;
+                    let publicUrl = "";
+                    if (publicUrlBase) {
+                        publicUrl = `${publicUrlBase}/${key}`;
+                    } else {
+                        // Fallback or error if critical. For now, we'll try to construct a standard R2 dev URL but it might not be reachable if access is private.
+                        // Ideally user provides PUBLIC_R2_URL.
+                        publicUrl = `https://${env.R2_BUCKET_DOMAIN || 'missing-public-url-env'}/${key}`;
+                    }
 
                     uploadedFiles.push({ key, url: publicUrl });
                 } catch (e: any) {

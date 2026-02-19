@@ -7,6 +7,9 @@ interface Env {
     DB: import('@cloudflare/workers-types').D1Database;
     RESEND_API_KEY: string;
     EMAIL_DOMAIN: string;
+    STORAGE: import('@cloudflare/workers-types').R2Bucket;
+    PUBLIC_R2_URL?: string;
+    R2_BUCKET_DOMAIN?: string;
 }
 
 declare namespace App {
